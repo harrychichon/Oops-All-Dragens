@@ -6,4 +6,3 @@ console.log(await searchFunction("monsters", "name", "Aboleth"));
 
 console.log(await searchFunction);
 
-console.log(await searchFunction);
