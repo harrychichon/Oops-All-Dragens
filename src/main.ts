@@ -1,8 +1,7 @@
 import "./main.scss";
-import { endpoints } from "./API/api";
-import { searchFunction } from "./Components/Search";
+import { fetchAll } from "./API/fetchFunctions";
 
-console.log(await searchFunction("monsters", "name", "Aboleth"));
+document.addEventListener("DOMContentLoaded", () => {});
 
-console.log(await searchFunction);
 
+//TODO drawMonsterCard event
