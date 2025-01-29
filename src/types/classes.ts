@@ -1,4 +1,4 @@
-import { AbilityScore } from "./abilityScores";
+import { AbilityScore } from "../constants/constants";
 import { Proficiency } from "./proficiencies";
 import { Equipment } from "./equipment";
 

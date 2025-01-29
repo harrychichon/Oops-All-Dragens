@@ -1,6 +1,6 @@
-import { baseUrl, endpoints } from "../API/api.ts";
-import { SearchResult, SearchableCategories } from "../Types/utilityTypes.ts";
-import { fetchApi } from "../API/fetchFunctions.ts";
+import { baseUrl, endpoints } from "../api/api.ts";
+import { SearchResult, SearchableCategories } from "../types/utilityTypes.ts";
+import { fetchApi } from "../api/fetchFunctions.ts";
 
 // Searches through all endpoints for Objects that match search phrase.
 //

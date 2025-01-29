@@ -1,7 +1,8 @@
 import { baseUrl, endpoints } from "./api";
-import { SearchResult } from "../Types/utilityTypes";
-import { Monster } from "../Types/monsters";
-import { Race } from "../Types/races";
+import { SearchResult } from "../types/utilityTypes";
+import { Monster } from "../types/monsters";
+import { Race } from "../types/races";
+import { Class } from "../types/classes";
 
 export const fetchApi = async <T>(apiUrl: string): Promise<T> => {
   const response = await fetch(apiUrl);
@@ -33,7 +34,7 @@ const filteredData = (object: endpointObjects): endpointObjects => {
 export const fetchAll = async (
   endpointKey: keyof typeof endpoints,
   pushArray: endpointObjects[]
-) => {
+): Promise<endpointObjects[]> => {
   const getAllObjects: SearchResult = await fetchApi(
     baseUrl + endpoints[endpointKey]
   );
@@ -44,6 +45,7 @@ export const fetchAll = async (
     const newObjectStructure = filteredData(data);
     pushArray.push(newObjectStructure);
   }
+  return pushArray;
 };
 
 //TODO fetchOne =>

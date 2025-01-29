@@ -1,4 +1,4 @@
-import { AbilityScore } from "./abilityScores";
+import { AbilityScore } from "../constants/constants";
 import { Monster } from "./monsters";
 
 export type SearchableCategories = keyof Monster;

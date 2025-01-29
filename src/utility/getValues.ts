@@ -1,6 +1,6 @@
-import { endpoints } from "../API/api";
-import { baseUrl } from "../API/api";
-import { fetchApi } from "../API/fetchFunctions";
+import { endpoints } from "../api/api";
+import { baseUrl } from "../api/api";
+import { fetchApi } from "../api/fetchFunctions";
 
 // Function to fetch data from a given endpoint URL
 const fetchEndpointData = async (endpointUrl: string) => {

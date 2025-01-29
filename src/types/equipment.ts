@@ -1,5 +1,3 @@
-import { Condition } from "./conditions";
-
 export enum Equipment {
   AdventuringGear = "Adventuring Gear",
   Ammunition = "Ammunition",
@@ -41,11 +39,3 @@ export enum Equipment {
   Weapon = "Weapon",
   WondrousItems = "Wondrous Items",
 }
-
-export type ArmorClass = {
-  type: string;
-  value: number;
-  armor?: string[];
-  condition?: Condition[];
-  desc: string;
-};

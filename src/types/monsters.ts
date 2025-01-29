@@ -1,17 +1,18 @@
-import { ArmorClass } from "./equipment";
+import { Condition } from "../constants/constants";
 import { DiceRoll } from "./dice";
 import { Proficiency } from "./proficiencies";
 import { DifficultyClass } from "./utilityTypes";
+import { HP } from "./hp";
 
 // Enums instead of string literals so runtime checks can be applied
-enum Size {
-  Tiny,
-  Small,
-  Medium,
-  Large,
-  Huge,
-  Gargantuan,
-}
+
+export type ArmorClass = {
+  type: string;
+  value: number;
+  armor?: string[];
+  condition?: Condition[];
+  desc: string;
+};
 
 enum MonsterType {
   Aberration = "aberration",
@@ -64,7 +65,7 @@ export enum DamageType {
 export type Monster = {
   name: string;
   armor_class: ArmorClass[];
-  hit_points: number;
+  hit_points: HP;
   hit_dice: DiceRoll;
   hit_points_roll: `${DiceRoll}+${number}`;
   strength: number;

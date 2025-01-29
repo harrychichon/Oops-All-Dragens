@@ -1,3 +1,12 @@
+export enum AbilityScore {
+  CHA,
+  CON,
+  DEX,
+  INT,
+  STR,
+  WIS,
+}
+
 export enum Alignment {
   AnyAlignment = "any alignment",
   AnyChaoticAlignment = "any chaotic alignment",
@@ -15,4 +24,31 @@ export enum Alignment {
   NeutralEvil = "neutral evil",
   NeutralGood = "neutral good",
   Unaligned = "unaligned",
+}
+
+export enum Condition {
+  Blinded,
+  Charmed,
+  Deafened,
+  Exhaustion,
+  Frightened,
+  Grappled,
+  Incapacitated,
+  Invisible,
+  Paralyzed,
+  Petrified,
+  Poisoned,
+  Prone,
+  Restrained,
+  Stunned,
+  Unconscious,
+}
+
+export enum Size {
+  Tiny,
+  Small,
+  Medium,
+  Large,
+  Huge,
+  Gargantuan,
 }
