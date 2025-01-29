@@ -1,2 +1,2 @@
-# DnD-5th-DM-tool
-Modular DM tool for DnD 5th edition
+# Card and dice game.
+Based on DnD 5th edition API: https://www.dnd5eapi.co/api/
