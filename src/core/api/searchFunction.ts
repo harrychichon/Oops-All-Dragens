@@ -1,6 +1,6 @@
-import { baseUrl, endpoints } from "../api/api.ts";
-import { SearchResult, SearchableCategories } from "../types/utilityTypes.ts";
-import { fetchApi } from "../api/fetchFunctions.ts";
+import { baseUrl, endpoints } from "./api.ts";
+import { SearchResult, SearchableCategories } from "./types.ts";
+import { fetchApi } from "./fetchFunctions.ts";
 
 // Searches through all endpoints for Objects that match search phrase.
 //
@@ -19,9 +19,7 @@ export const searchFunction = async (
   if (searchCategory) {
     // If a specific search category is given
     resultPromises = Object.keys(endpoints).map(async (key) => {
-      const url = `${baseUrl}${
-        endpoints[key as keyof typeof endpoints]
-      }/?${String(searchCategory)}=${searchPhrase}`;
+      const url = `${baseUrl}${endpoints[key as keyof typeof endpoints]}/?${String(searchCategory)}=${searchPhrase}`;
       // Make sure fetchApi returns an array of SearchResult objects
       const result: SearchResult[] = await fetchApi(url); // Adjusted to expect an array of SearchResults
       return result;
@@ -29,9 +27,7 @@ export const searchFunction = async (
   } else {
     // If no category is provided, search across all categories
     resultPromises = Object.keys(endpoints).map(async (key) => {
-      const url = `${baseUrl}${
-        endpoints[key as keyof typeof endpoints]
-      }/?name=${searchPhrase}`;
+      const url = `${baseUrl}${endpoints[key as keyof typeof endpoints]}/?name=${searchPhrase}`;
       const result: SearchResult[] = await fetchApi(url);
       return result;
     });

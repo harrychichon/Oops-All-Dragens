@@ -1,36 +1,15 @@
-import { Condition } from "../constants/constants";
-import { DiceRoll } from "./dice";
-import { Proficiency } from "./proficiencies";
-import { DifficultyClass } from "./utilityTypes";
-import { HP } from "./hp";
+import { DiceRoll } from "../../../core/utils/types/dice";
+import { Proficiency } from "../../character/types.ts/proficiencies";
+import { HP } from "../../../core/utils/types/hp";
+import { AbilityScore } from "../../character/types.ts/abilityScore";
 
 // Enums instead of string literals so runtime checks can be applied
 
-export type ArmorClass = {
-  type: string;
-  value: number;
-  armor?: string[];
-  condition?: Condition[];
-  desc: string;
+export type DifficultyClass = {
+  dcType: AbilityScore;
+  dcValue: number;
+  successType?: string;
 };
-
-enum MonsterType {
-  Aberration = "aberration",
-  Beast = "beast",
-  Celestial = "celestial",
-  Construct = "construct",
-  Dragon = "dragon",
-  Elemental = "elemental",
-  Fey = "fey",
-  Fiend = "fiend",
-  Giant = "giant",
-  Humanoid = "humanoid",
-  Monstrosity = "monstrosity",
-  Ooze = "ooze",
-  Plant = "plant",
-  SvarmOfTinyBeasts = "swarm of Tiny beasts",
-  Undead = "undead",
-}
 
 export enum DamageType {
   Acid = "acid",
@@ -64,7 +43,7 @@ export enum DamageType {
 
 export type Monster = {
   name: string;
-  armor_class: ArmorClass[];
+  armor_class: number[];
   hit_points: HP;
   hit_dice: DiceRoll;
   hit_points_roll: `${DiceRoll}+${number}`;

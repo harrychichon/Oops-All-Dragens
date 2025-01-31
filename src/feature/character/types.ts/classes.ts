@@ -1,6 +1,6 @@
-import { AbilityScore } from "../constants/constants";
+import { AbilityScore } from "./abilityScore";
 import { Proficiency } from "./proficiencies";
-import { Equipment } from "./equipment";
+import { Equipment } from "../../inventory/equipment";
 
 export type Class = {
   name: string;
