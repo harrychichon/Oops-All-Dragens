@@ -1,4 +1,4 @@
-import { AbilityScore } from "../../../constants/constants";
+import { AbilityScore } from "./abilityScore";
 import { Proficiency } from "./proficiencies";
 
 export type Race = {

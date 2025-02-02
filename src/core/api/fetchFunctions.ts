@@ -1,73 +1,116 @@
 import { baseUrl, endpoints } from "./api";
-import { SearchResult } from "../../types/utilityTypes";
-import { Monster } from "../../types/monsters";
-import { Race } from "../../feature/character/types.ts/races";
-import { Class } from "../../types/classes";
+import { SearchResult } from "./types";
+import { EntityMap, isType } from "../typeGuards";
 
-//===================================================================================================
-// ALL PURPOSE FETCH
-//===================================================================================================
+//===============================================================================
+// ❓ UNIVERSAL FETCH FUNCTION
+//===============================================================================
 export const fetchApi = async <T>(apiUrl: string): Promise<T> => {
   const response = await fetch(apiUrl);
-  const data: T = await response.json();
-  return data;
-};
-//===================================================================================================
-
-//===================================================================================================
-// Helper function to extract desired keys
-//===================================================================================================
-const allowedKeys: Record<string, Set<string>> = {
-  Monster: new Set([
-    "name",
-    "armor_class",
-    "hit_points",
-    "hit_dice",
-    "hit_points_roll",
-    "strength",
-    "dexterity",
-    "constitution",
-    "intelligence",
-    "wisdom",
-    "charisma",
-    "proficiencies",
-    "challenge_rating",
-    "xp",
-    "special_abilities",
-    "actions",
-    "image",
-  ]),
-  Class: new Set([
-    "name",
-    "hit_die",
-    "proficiencies",
-    "saving_throws",
-    "starting_equipment",
-    "starting_equipment_options",
-  ]),
-  Race: new Set(["name", "ability_bonuses", "alignment", "age", "size_description", "starting_proficiencies"]),
+  return response.json();
 };
 
-const filterObjectKeys = <T extends Record<string, any>>(obj: T): Partial<T> => {
-  let typeKey: keyof typeof allowedKeys;
 
-  if ("armor_class" in obj) {
-    typeKey = "Monster";
-  } else if ("hit_die" in obj) {
-    typeKey = "Class";
-  } else if ("ability_bonuses" in obj) {
-    typeKey = "Race";
-  } else {
-    throw new Error("Unknown object type");
+//===============================================================================
+// ❓ HELPER FUNCTION: FLATTEN OBJECT STRUCTURE (USED WHEN FILTERED KEYS ARE 
+//    NESTED)
+//===============================================================================
+const flattenObject = (obj: any, prefix = ""): Record<string, any> =>
+  Object.assign(
+    {},
+    ...Object.entries(obj).map(([key, value]) =>
+      typeof value === "object" && value !== null
+        ? flattenObject(value, `${prefix}${key}.`)
+        : { [`${prefix}${key}`]: value }
+    )
+  );
+
+
+//===============================================================================
+// ❓ ALLOWED KEYS CONFIGURATION
+//===============================================================================
+const allowedKeys: Record<string, Record<string, Set<string> | null>> = {
+  monster: {
+    name: null,
+    armor_class: null,
+    hit_points: null,
+    hit_dice: null,
+    hit_points_roll: null,
+    strength: null,
+    dexterity: null,
+    constitution: null,
+    intelligence: null,
+    wisdom: null,
+    charisma: null,
+    proficiencies: null,
+    challenge_rating: null,
+    xp: null,
+    special_abilities: null,
+    actions: null,
+    image: null,
+  },
+  class: {
+    name: null,
+    hit_die: null,
+    proficiency_choices: null,
+    proficiencies: null,
+    saving_throws: null,
+    starting_equipment: new Set(["equipment.name", "quantity"]),
+    starting_equipment_options: new Set(["choose", "count", "of.name"]),
+  },
+  race: {
+    name: null,
+    ability_bonuses: null,
+    alignment: null,
+    age: null,
+    size_description: null,
+    starting_proficiencies: null,
+  },
+};
+
+//===============================================================================
+// ❓ FILTER/APPLY ALLOWED KEYS FUNCTION
+//===============================================================================
+export const filterAllowedKeys = <T extends Record<string, any>>(
+  entityType: string,
+  data: T
+): Partial<T> => {
+  const entityRules = allowedKeys[entityType.toLowerCase()];
+
+
+  if (!entityRules) {
+    console.warn(`No allowed keys defined for entity type: ${entityType}`);
+    return {};
   }
 
-  return Object.fromEntries(Object.entries(obj).filter(([key]) => allowedKeys[typeKey].has(key))) as Partial<T>;
-};
-//===================================================================================================
+  return Object.fromEntries(
+    Object.entries(data)
+      .filter(([key]) => key in entityRules) // Keep only allowed top-level keys
+      .map(([key, value]) => {
+        const subKeys = entityRules[key];
 
-//===================================================================================================
-// FETCH ALL AND RESTRUCTURE
-//===================================================================================================
+        if (subKeys instanceof Set && Array.isArray(value)) {
+          return [
+            key,
+            value.map((item) =>
+              Object.fromEntries(
+                Object.entries(flattenObject(item)).filter(([subKey]) =>
+                  subKeys.has(subKey)
+                )
+              )
+            ),
+          ];
+        }
+
+        return [key, value]; // Return as-is if no filtering is needed
+      })
+  ) as Partial<T>;
+};
+
+
+//===============================================================================
+// ❓ FETCH & RESTRUCTURE ALL OBJECTS
+//===============================================================================
 export const fetchAndRestructureAllObjects = async <T extends Record<string, any>>(
   endpointKey: keyof typeof endpoints,
   pushArray: Partial<T>[]
@@ -77,32 +120,31 @@ export const fetchAndRestructureAllObjects = async <T extends Record<string, any
   for (const element of getAllObjects.results) {
     const fetchedObject: T = await fetchApi(`${baseUrl}${endpoints[endpointKey]}${element.index}`);
 
-    // Apply the new filtering logic
-    const filteredObject = filterObjectKeys(fetchedObject);
-
+    const filteredObject = filterAllowedKeys(endpointKey, fetchedObject);
     pushArray.push(filteredObject);
   }
 
   return pushArray;
 };
 
-//===================================================================================================
 
-//===================================================================================================
-// FETCH ONE AND RESTRUCTURE
-//===================================================================================================
-export const fetchAndRestructureOneObject = async <T extends Record<string, any>>(
+//===============================================================================
+// ❓ FETCH & RESTRUCTURE A SINGLE OBJECT
+//===============================================================================
+export const fetchAndRestructureOneObject = async <T extends keyof EntityMap>(
   endpointKey: keyof typeof endpoints,
   objectName: string
-): Promise<Partial<T>> => {
-  const fetchedObject: T = await fetchApi(
-    `${baseUrl}${endpoints[endpointKey]}${objectName}`.toLowerCase().replaceAll(" ", "-")
+): Promise<EntityMap[T]> => {
+  const fetchedObject = await fetchApi(
+    `${baseUrl}${endpoints[endpointKey]}${objectName.toLowerCase().replaceAll(" ", "-")}`
   );
 
-  // Filter the object dynamically based on its type
-  const restructuredObject = filterObjectKeys(fetchedObject);
+  // Dynamically check the entity type and apply filtering
+  for (const entityType of Object.keys(allowedKeys) as T[]) {
+    if (isType(fetchedObject, entityType)) {
+      return filterAllowedKeys(entityType, fetchedObject) as EntityMap[T];
+    }
+  }
 
-  return restructuredObject;
+  throw new Error(`Unknown object type for ${objectName}`);
 };
-
-//===================================================================================================

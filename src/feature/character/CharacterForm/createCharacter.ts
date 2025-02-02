@@ -1,11 +1,12 @@
 import { createElement } from "../../../core/utils/createElement";
-import { fetchAndRestructureOneObject } from "../../../core/api/fetchFunctions";
+import { fetchAndRestructureOneObject, filterAllowedKeys } from "../../../core/api/fetchFunctions";
 import { AbilityScore } from "../types.ts/abilityScore";
-import {} from "../../../core/events";
+import { Class } from "../types.ts/classes";
+import { Race } from "../types.ts/races";
 
-//===================================================================================================
-// SUPPORT FUNCTION
-//===================================================================================================
+//===============================================================================
+// ❓ SUPPORT FUNCTION
+//===============================================================================
 const createRadioButtonGroups = (groupName: string, array: string[] | number[], parent: HTMLElement) => {
   array.forEach((element) => {
     const input = createElement("input", {
@@ -19,38 +20,31 @@ const createRadioButtonGroups = (groupName: string, array: string[] | number[], 
     parent.appendChild(label);
   });
 };
-//===================================================================================================
 
-//===================================================================================================
-// MAIN FUNCTION
-//===================================================================================================
+
+//===============================================================================
+// ❓ MAIN FUNCTION
+//===============================================================================
+const availableClasses: Class[] = [];
+
+const fetchClasses = await fetchAndRestructureOneObject("classes", "Barbarian") as Class;
+const filteredClass = filterAllowedKeys("Class", fetchClasses) as Class;
+availableClasses.push(filteredClass);
+console.log(filteredClass);
+
+const allRaces: string[] = [
+  "Dragonborn",
+  "Dwarf",
+  "Elf",
+  "Gnome",
+  "Half-Elf",
+  "Half-Orc",
+  "Halfling",
+  "Human",
+  "Tiefling",
+];
+
 export const createCharacterForm = (divParent: HTMLElement) => {
-  const allRaces: string[] = [
-    "Dragonborn",
-    "Dwarf",
-    "Elf",
-    "Gnome",
-    "Half-Elf",
-    "Half-Orc",
-    "Halfling",
-    "Human",
-    "Tiefling",
-  ];
-  const allClasses: string[] = [
-    "Bard",
-    "Barbarian",
-    "Cleric",
-    "Druid",
-    "Fighter",
-    "Monk",
-    "Paladin",
-    "Ranger",
-    "Rogue",
-    "Sorcerer",
-    "Warlock",
-    "Wizard",
-  ];
-
   const div: HTMLDivElement = createElement("div", {
     innerHTML: `
     <h1>Character creation</h1>
@@ -64,114 +58,183 @@ export const createCharacterForm = (divParent: HTMLElement) => {
     innerHTML: "<h2>Choose a race</h2>",
   });
   createRadioButtonGroups("races", allRaces, sectionRace);
+  const selectedRace = createElement("section", { id: "race-current-selection" });
 
   //CLASS
   const sectionClass = createElement("section", {
     className: "sectionClass",
     innerHTML: "<h2>Choose a class</h2>",
   });
-  createRadioButtonGroups("classes", allClasses, sectionClass);
+  const classNames = availableClasses.map((cls) => cls.name);
+  createRadioButtonGroups("classes", classNames, sectionClass);
+  const selectedClass = createElement("section", { id: "class-current-selection" });
 
   //DESCRIPTION
-  const sectionDescription = createElement("section", { id: "character-description" });
-  div.append(sectionRace, sectionClass, sectionDescription);
+  const containerCurrentSelection = createElement("div", { id: "character-description" });
+  div.append(sectionRace, sectionClass, containerCurrentSelection);
+  containerCurrentSelection.append(selectedRace, selectedClass);
 
-  //EventListener function to fetch a class/race
-
-  // document.getElementById("section-race");
-  // document.getElementById("section-class");
+  //EventListener function to fetch a class/race //TODO Flytta till events.ts
   const handleCharacterChoices = async (e: Event) => {
     const target = e.target as HTMLInputElement;
     const endpoint = target.name === "races" ? "races" : "classes";
-    const response = await fetchAndRestructureOneObject(endpoint, target.value);
+
+    const response =
+      endpoint === "races"
+        ? await fetchAndRestructureOneObject("races", target.value)
+        : await fetchAndRestructureOneObject("classes", target.value);
     console.log(response);
 
-    // TODO plocka ut varje IF och gör till funktion som kallas på för bättre läsbarhet
     if (endpoint === "races") {
-      const className = createElement("h3", {
-        innerHTML: `${response.name.toUpperCase()}`,
+      // Heading
+      const fetchedRace = response as Race;
+      selectedRace.innerHTML = ""; // Clears container so selections won't stack
+      const raceName = createElement("h3", {
+        innerHTML: `${fetchedRace.name.toUpperCase()}`,
       });
+      selectedRace.appendChild(raceName)
+
+      // Description
       const raceAbout = createElement("p", {
         innerHTML: `
-        ${response.alignment}<br/>
-        ${response.size_description}<br/>
-        ${response.age}
+        ${fetchedRace.size_description}
+        ${fetchedRace.age}
         `,
       });
-      const raceAbilityBonusTable = createElement("table", {
-        innerHTML: `
-        <caption>Ability bonuses</caption>
-        `,
-      });
+      selectedRace.appendChild(raceAbout)
 
+      //Ability bonus
+      const raceAbilityBonusTable = createElement("table");
+      const tableCaption = createElement("caption", { innerHTML: "Ability bonuses"})
+      raceAbilityBonusTable.appendChild(tableCaption);
       const tableThead = createElement("thead");
       raceAbilityBonusTable.appendChild(tableThead);
-
       const tr = createElement("tr");
       tableThead.appendChild(tr);
-
-      // Append the created elements to the DOM
-      const parentElement = document.getElementById("character-description");
-      if (parentElement) {
-        parentElement.appendChild(className);
-        parentElement.appendChild(raceAbout);
-        parentElement.appendChild(raceAbilityBonusTable);
-      }
-
+      selectedRace.appendChild(raceAbilityBonusTable);
+      
       const mappedBonuses: Record<string, number> = {};
-      response.ability_bonuses.forEach(
-        ({ ability_score, bonus }: { ability_score: { name: string }; bonus: number }) => {
+      fetchedRace.ability_bonuses.forEach(
+        ({ abilityScore, bonus }: { ability_score: { name: string }; bonus: number }) => { //TODO The fuck is this? Är detta kopplat till att val av score har börjat flippa ur? Troligtvis tänker jag
           mappedBonuses[ability_score.name] = bonus;
-          const th = createElement("th", { scope: "col", innerHTML: `${ability_score.name}` });
+          const th = createElement("th", { scope: "col", innerHTML: `${abilityScore.name}` });
           tr.appendChild(th);
           const td = createElement("td", { innerHTML: `${bonus}` });
           th.appendChild(td);
         }
       );
 
-      //TODO starting_proficiencies -> Gå igenom alla proficiencies och ta bort de som är inaktuella
-      //TODO starting_proficiencies -> if (!nyckel i enum Proficiency) {ignore} else {hantera}
     } else if (endpoint === "classes") {
-      const className = createElement("h3", {
-        innerHTML: `${response.name.toUpperCase()}`,
-      });
-      const raceAbout = createElement("p", {
-        innerHTML: `
-        ${response.alignment}<br/>
-        ${response.size_description}<br/>
-        ${response.age}
-        `,
-      });
-      const raceAbilityBonusTable = createElement("table", {
-        innerHTML: `
-        <caption>Ability bonuses</caption>
-        `,
-      });
+    // Heading
+    const fetchedClass = response as Class;
+    selectedClass.innerHTML = ""; // Clears container so selections won't stack
+    const className = createElement("h3", {
+      innerHTML: `${fetchedClass.name.toUpperCase()}`,
+    });
+    selectedClass.appendChild(className)
+    
+    // Hit die
+    const classAbout = createElement("p", {
+      innerHTML: `Hit Die: d${fetchedClass.hit_die}`,
+    });
+    selectedClass.appendChild(classAbout)
+  
 
-      const tableThead = createElement("thead");
-      raceAbilityBonusTable.appendChild(tableThead);
+    // Remaining class perks and equipment
+    const tableKeys: (keyof Class)[] = [
+      "proficiencies",
+      "saving_throws",
+      "starting_equipment",
+      "starting_equipment_options",
+    ];
 
-      const tr = createElement("tr");
-      tableThead.appendChild(tr);
+    tableKeys.forEach((key) => {
+      const perksAndEquipment = fetchedClass[key] as any[] | undefined; //TODO Ändra 'any'
 
-      // Append the created elements to the DOM
-      const parentElement = document.getElementById("character-description");
-      if (parentElement) {
-        parentElement.appendChild(className);
-        parentElement.appendChild(raceAbout);
-        parentElement.appendChild(raceAbilityBonusTable);
-      }
+      // Checks type and that it's an array that's not empty
+      if (perksAndEquipment && Array.isArray(perksAndEquipment) && perksAndEquipment.length > 0) {
+        // Create table element
+        const classTable = createElement("table");
+        const caption = createElement("caption", {
+          innerHTML: key.replace(/_/g, " ").toUpperCase(),
+        });
+        classTable.appendChild(caption);
+        const tr = createElement("tr");
+        classTable.appendChild(tr);
 
-      const mappedBonuses: Record<string, number> = {};
-      response.ability_bonuses.forEach(
-        ({ ability_score, bonus }: { ability_score: { name: string }; bonus: number }) => {
-          mappedBonuses[ability_score.name] = bonus;
-          const th = createElement("th", { scope: "col", innerHTML: `${ability_score.name}` });
-          tr.appendChild(th);
-          const td = createElement("td", { innerHTML: `${bonus}` });
-          th.appendChild(td);
+        if (key === "starting_equipment") {
+          const headerRow = createElement("tr");
+          headerRow.appendChild(createElement("th", { innerHTML: "Name" }));
+          headerRow.appendChild(createElement("th", { innerHTML: "Quantity" }));
+          classTable.appendChild(headerRow);
+
+          // Populate table with starting equipment
+          perksAndEquipment.forEach((item) => {
+            const row = createElement("tr");
+            row.appendChild(
+              createElement("td", { innerHTML: item.equipment.name || "N/A" })
+            );
+            row.appendChild(
+              createElement("td", { innerHTML: item.quantity?.toString() || "N/A" })
+            );
+            classTable.appendChild(row);
+          });
+
+        } else if (key === "starting_equipment_options") {
+          const headerRow = createElement("tr");
+          headerRow.appendChild(createElement("th", { innerHTML: "Choose" }));
+          headerRow.appendChild(createElement("th", { innerHTML: "Count" }));
+          headerRow.appendChild(createElement("th", { innerHTML: "Name" }));
+          classTable.appendChild(headerRow);
+
+          // Populate table with starting equipment options
+          perksAndEquipment.forEach((item) => {
+            const row = createElement("tr");
+
+            // Create a cell for "choose"
+            row.appendChild(
+              createElement("td", { innerHTML: item.choose?.toString() || "N/A" })
+            );
+
+            // Check if options exist //TODO Behövs den här med nya filtreringen?
+            if (item.from?.options) {
+              item.from.options.forEach((option: { count?: number; of?: { name: string } }) => {
+                const optionRow = createElement("tr");
+
+                // Create a cell for "count"
+                optionRow.appendChild(
+                  createElement("td", {
+                    innerHTML: option.count?.toString() || "N/A",
+                  })
+                );
+
+                // Create a cell for "name"
+                optionRow.appendChild(
+                  createElement("td", {
+                    innerHTML: option.of?.name || "N/A",
+                  })
+                );
+
+                classTable.appendChild(optionRow);
+              });
+            }
+            classTable.appendChild(row);
+          });
+        } else {
+          // Default behavior: Create a cell for each object's `name`
+          perksAndEquipment.forEach((element) => {
+            const td = createElement("td", { innerHTML: element.name });
+            tr.appendChild(td);
+          });
+          classTable.appendChild(tr);
         }
-      );
+
+        // Append table to the selection container
+        selectedClass.appendChild(classTable);
+      }
+    });
+
+      
     } else {
       throw Error("Selection not found.");
     }
@@ -194,7 +257,7 @@ export const createCharacterForm = (divParent: HTMLElement) => {
   //TODO Beskrivning av respektive ability score
   //Creates sections for each Ability Score
   Object.keys(AbilityScore).forEach((key) => {
-    // This filters out any numeric values from the enum
+    // Filter out any numeric values from the enum
     if (isNaN(Number(key))) {
       const sectionAbility = createElement("section", {
         id: key,
@@ -209,7 +272,7 @@ export const createCharacterForm = (divParent: HTMLElement) => {
   const allAbilityScoreRadioGroups = document.querySelectorAll("section");
 
   //Ensures each value for abilityScoreValues can only be selected for one of the ability scores
-  allAbilityScoreRadioGroups.forEach((selectedGroup) => {
+  allAbilityScoreRadioGroups.forEach((selectedGroup) => { // TODO 1. Varför beter den sig konstigt när man väljer? //TODO 2. Flytta till event.ts
     selectedGroup.addEventListener("change", (e: Event) => {
       const target = e.target as HTMLInputElement | null;
       if (!target) return;
@@ -217,8 +280,8 @@ export const createCharacterForm = (divParent: HTMLElement) => {
 
       allAbilityScoreRadioGroups.forEach((otherGroups) => {
         if (otherGroups !== selectedGroup) {
-          const radios = otherGroups.querySelectorAll(`input[type="radio"]`);
-          radios.forEach((radio) => {
+          const radioButtons = otherGroups.querySelectorAll(`input[type="radio"]`);
+          radioButtons.forEach((radio) => {
             const radioInput = radio as HTMLInputElement;
             if (radioInput.value === selectedValue) {
               radioInput.disabled = true;
@@ -231,7 +294,7 @@ export const createCharacterForm = (divParent: HTMLElement) => {
     });
   });
 };
-//===================================================================================================
+
 
 // ADD starting_equipment based on your class, show them && CHOOSE starting_equipment_options based on your class
 // ADD Saving throws

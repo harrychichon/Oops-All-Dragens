@@ -1,7 +1,9 @@
-import { Monster } from "../types/monsters";
+import { Monster } from "../feature/cards/monsters/monsters";
 import { Equipment } from "../feature/inventory/equipment";
-import { GamePhase } from "../constants/constants";
 
+//===============================================================================
+// ❓ STATE
+//===============================================================================
 // Stored in array and map for different uses
 type GameData = {
   monsters: Monster[];
@@ -14,7 +16,7 @@ type GameData = {
   //   spellMap: Record<string, Spell>;
 };
 
-const GameData = {
+const table: GameData = {
   monsters: [],
   monsterMap: {},
   equipment: [],
@@ -34,6 +36,4 @@ const GameData = {
 // case activeGamePhase === GamePhase.Loading = {possible actions(null)}
 // case activeGamePhase === GamePhase.Error = {possible actions(cry)}
 
-
-//TODO Funktion som reglerar vad som sker under respektive GamePhase
 

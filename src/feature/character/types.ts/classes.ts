@@ -5,17 +5,38 @@ import { Equipment } from "../../inventory/equipment";
 export type Class = {
   name: string;
   hit_die: number;
-  proficiencies: [
+  proficiencies_choices: [
     {
-      name: Proficiency;
+      desc: string;
+      choose: number;
+      from: {
+        options: [
+          item: {
+            name: Proficiency;
+          }
+        ];
+      };
     }
   ];
+  proficiencies: [{
+    name: Proficiency,
+    }
+  ]
   saving_throws: [
     {
       name: AbilityScore;
     }
   ];
-  starting_equipment: Equipment[];
+  starting_equipment: [
+    {
+      equipment: {
+      index: string,
+      name: Equipment,
+      url: string,
+      },
+      quantity: number,
+    }
+  ];
   starting_equipment_options: [
     {
       desc: string;
@@ -60,5 +81,4 @@ export type Class = {
       };
     }
   ];
-  // class_levels: string; //TODO Vill jag lägga in den här=
 };

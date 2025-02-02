@@ -1,45 +1,6 @@
 import { DiceRoll } from "../../../core/utils/types/dice";
 import { Proficiency } from "../../character/types.ts/proficiencies";
 import { HP } from "../../../core/utils/types/hp";
-import { AbilityScore } from "../../character/types.ts/abilityScore";
-
-// Enums instead of string literals so runtime checks can be applied
-
-export type DifficultyClass = {
-  dcType: AbilityScore;
-  dcValue: number;
-  successType?: string;
-};
-
-export enum DamageType {
-  Acid = "acid",
-  Bludgeoning = "bludgeoning",
-  BludgeoningFromNonmagicalWeapons = "Bludgeoning from nonmagical weapons",
-  BludgeoningFromNonmagicalWeaponsThatArentAdamantine = "Bludgeoning from nonmagical weapons that aren't adamantine",
-  BludgeoningFromNonmagicalWeaponsThatArentSilvered = "Bludgeoning from nonmagical weapons that aren't silvered",
-  Cold = "cold",
-  Fire = "fire",
-  Lightning = "lightning",
-  Necrotic = "necrotic",
-  NonAdamantineWeapons = "bludgeoning, piercing, and slashing from nonmagical weapons that aren't adamantine",
-  NonMagicalWeapons = "bludgeoning, piercing, and slashing from nonmagical weapons",
-  NonSilveredWeapons = "bludgeoning, piercing, and slashing from nonmagical weapons that aren't silvered",
-  Piercing = "piercing",
-  PiercingFromMagicWeaponsWieldedByGoodCreatures = "piercing from magic weapons wielded by good creatures",
-  PiercingFromNonmagicalWeapons = "Piercing from nonmagical weapons",
-  PiercingFromNonmagicalWeaponsThatArentAdamantine = "Piercing from nonmagical weapons that aren't adamantine",
-  PiercingFromNonmagicalWeaponsThatArentSilvered = "Piercing from nonmagical weapons that aren't silvered",
-  Poison = "poison",
-  Psychic = "psychic",
-  Radiant = "radiant",
-  Slashing = "slashing",
-  SlashingFromNonmagicalWeapons = "Slashing from nonmagical weapons",
-  SlashingFromNonmagicalWeaponsThatArentAdamantine = "Slashing from nonmagical weapons that aren't adamantine",
-  SlashingFromNonmagicalWeaponsThatArentSilvered = "Slashing from nonmagical weapons that aren't silvered",
-  Spells = "damage from spells",
-  Stoneskin = "bludgeoning, piercing, and slashing from nonmagical attacks (from stoneskin)",
-  Thunder = "thunder",
-}
 
 export type Monster = {
   name: string;
@@ -72,7 +33,7 @@ export type Monster = {
         ability: {
           name: string; //TODO Uppdatera till Spell.name efter alla spells är typade
         };
-        dc?: DifficultyClass;
+        dc?: number;
       };
       modifier: number; //TODO Behövs den här?
       spells: [
@@ -94,7 +55,7 @@ export type Monster = {
       name: string;
       desc: string;
       attack_bonus?: number;
-      dc?: DifficultyClass;
+      dc?: number;
       damage?: {
         damage_dice: `${DiceRoll}+${number}`;
       }[];

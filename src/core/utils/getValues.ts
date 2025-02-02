@@ -1,21 +1,25 @@
-import { endpoints } from "../core/api/api";
-import { baseUrl } from "../core/api/api";
-import { fetchApi } from "../core/api/fetchFunctions";
+import { endpoints, baseUrl } from "../../core/api/api";
+import { fetchApi } from "../../core/api/fetchFunctions";
 
-// Function to fetch data from a given endpoint URL
+//===============================================================================
+// ❓ Function to fetch data from a given endpoint URL
+//===============================================================================
 const fetchEndpointData = async (endpointUrl: string) => {
   const url = `${baseUrl}${endpointUrl}`;
   return await fetchApi(url);
 };
-n;
 
-// Function to fetch item data from a result URL
+//===============================================================================
+// ❓ Function to fetch item data from a result URL
+//===============================================================================
 const fetchItemData = async (resultUrl: string) => {
   const itemUrl = resultUrl.startsWith("/api/") ? `${baseUrl}${resultUrl.slice(4)}` : `${baseUrl}${resultUrl}`;
   return await fetchApi(itemUrl);
 };
 
-// Function to collect key-value pairs from item data
+//===============================================================================
+// ❓ Function to collect key-value pairs from item data
+//===============================================================================  
 const collectKeyValuePairs = (itemData: Record<string, any>, keyValueMap: Record<string, Set<string>>) => {
   for (const [key, value] of Object.entries(itemData)) {
     if (!keyValueMap[key]) {
@@ -32,7 +36,9 @@ const collectKeyValuePairs = (itemData: Record<string, any>, keyValueMap: Record
   }
 };
 
-// Function to log aggregated data
+//===============================================================================
+// ❓ Function to log aggregated data
+//===============================================================================
 const logAggregatedData = (keyValueMap: Record<string, Set<string>>, selectedEndpoint: string) => {
   console.log(`\n  Aggregated data from ${selectedEndpoint}:`);
   for (const [key, valueSet] of Object.entries(keyValueMap)) {
@@ -40,7 +46,9 @@ const logAggregatedData = (keyValueMap: Record<string, Set<string>>, selectedEnd
   }
 };
 
-// Main function to fetch and log endpoint data
+//===============================================================================
+// ❓ Main function to fetch and log endpoint data
+//===============================================================================
 export const fetchAndLogEndpointData = async (selectedEndpoint: keyof typeof endpoints) => {
   const endpointUrl = endpoints[selectedEndpoint];
   console.log(`\nFetching data for endpoint: ${selectedEndpoint}`);
