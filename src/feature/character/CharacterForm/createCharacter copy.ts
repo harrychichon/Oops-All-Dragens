@@ -32,7 +32,7 @@ export const createCharacterForm = (divParent: HTMLElement) => {
   const div: HTMLDivElement = createElement("div", { // Skapa element för H1
     innerHTML: `
     <h1>Character creation</h1>
-    `,
+    `
   });
   divParent.appendChild(div);
 
@@ -76,20 +76,20 @@ export const createCharacterForm = (divParent: HTMLElement) => {
       const raceName = createElement("h3", {
         innerHTML: `${fetchedRace.name.toUpperCase()}`,
       });
-      selectedRace.appendChild(raceName)
+      selectedRace.appendChild(raceName);
 
       // Description
       const raceAbout = createElement("p", {
         innerHTML: `
-        ${fetchedRace.size_description}
-        ${fetchedRace.age}
-        `,
+      ${fetchedRace.size_description}
+      ${fetchedRace.age}
+      `
       });
-      selectedRace.appendChild(raceAbout)
+      selectedRace.appendChild(raceAbout);
 
-      //Ability bonus
+      // Ability bonus
       const raceAbilityBonusTable = createElement("table");
-      const tableCaption = createElement("caption", { innerHTML: "Ability bonuses" })
+      const tableCaption = createElement("caption", { innerHTML: "Ability bonuses" });
       raceAbilityBonusTable.appendChild(tableCaption);
       const tableThead = createElement("thead");
       raceAbilityBonusTable.appendChild(tableThead);
@@ -115,14 +115,13 @@ export const createCharacterForm = (divParent: HTMLElement) => {
       const className = createElement("h3", {
         innerHTML: `${fetchedClass.name.toUpperCase()}`,
       });
-      selectedClass.appendChild(className)
+      selectedClass.appendChild(className);
 
       // Hit die
       const classAbout = createElement("p", {
-        innerHTML: `Hit Die: d${fetchedClass.hit_die}`,
+        innerHTML: `Hit Die: d${fetchedClass.hit_die}`
       });
-      selectedClass.appendChild(classAbout)
-
+      selectedClass.appendChild(classAbout);
 
       // Remaining class perks and equipment
       const tableKeys: (keyof Class)[] = [
@@ -133,105 +132,60 @@ export const createCharacterForm = (divParent: HTMLElement) => {
       ];
 
       tableKeys.forEach((key) => {
-        const perksAndEquipment = fetchedClass[key] as any[] | undefined; //TODO Ändra 'any'
+        const items = fetchedClass[key] as any[] | undefined;
 
-        // Checks type and that it's an array that's not empty
-        if (perksAndEquipment && Array.isArray(perksAndEquipment) && perksAndEquipment.length > 0) {
+        if (items && Array.isArray(items) && items.length > 0) {
           // Create table element
           const classTable = createElement("table");
+
+          // Create and append caption
           const caption = createElement("caption", {
             innerHTML: key.replace(/_/g, " ").toUpperCase(),
           });
           classTable.appendChild(caption);
+
+          // Create table row
           const tr = createElement("tr");
           classTable.appendChild(tr);
 
           if (key === "starting_equipment") {
-            const headerRow = createElement("tr");
-            headerRow.appendChild(createElement("th", { innerHTML: "Name" }));
-            headerRow.appendChild(createElement("th", { innerHTML: "Quantity" }));
-            classTable.appendChild(headerRow);
-
-            console.log(perksAndEquipment)
-
-            // Populate table with starting equipment
-            perksAndEquipment.forEach((item) => {
-              const row = createElement("tr");
-              row.appendChild(
-                createElement("td", { innerHTML: item["equipment.name"] })
-              );
-              row.appendChild(
-                createElement("td", { innerHTML: item.quantity?.toString() })
-              );
-              classTable.appendChild(row);
-            });
-
+            // Only take the first element and create a td with its `name`
+            const td = createElement("td", { innerHTML: items[0]?.equipment?.name || "N/A" });
+            tr.appendChild(td);
           } else if (key === "starting_equipment_options") {
-            const headerRow = createElement("tr");
-            headerRow.appendChild(createElement("th", { innerHTML: "Choose" }));
-            headerRow.appendChild(createElement("th", { innerHTML: "Count" }));
-            headerRow.appendChild(createElement("th", { innerHTML: "Name" }));
-            classTable.appendChild(headerRow);
-
-            // Populate table with starting equipment options
-            perksAndEquipment.forEach((item) => {
-              const row = createElement("tr");
-
-              // Create a cell for "choose"
-              row.appendChild(
-                createElement("td", { innerHTML: item.choose?.toString() || "N/A" })
-              );
-
-              // Check if options exist //TODO Behövs den här med nya filtreringen?
-              if (item.from?.options) {
-                item.from.options.forEach((option: { count?: number; of?: { name: string } }) => {
-                  const optionRow = createElement("tr");
-
-                  // Create a cell for "count"
-                  optionRow.appendChild(
-                    createElement("td", {
-                      innerHTML: option.count?.toString() || "N/A",
-                    })
-                  );
-
-                  // Create a cell for "name"
-                  optionRow.appendChild(
-                    createElement("td", {
-                      innerHTML: option.of?.name || "N/A",
-                    })
-                  );
-
-                  classTable.appendChild(optionRow);
-                });
-              }
-              classTable.appendChild(row);
+            // Create a td with `desc`
+            const descTd = createElement("td", {
+              innerHTML: items[0]?.desc || "N/A",
             });
+            tr.appendChild(descTd);
+
+            // Loop through `items[0].from.options` and create tds for each `of.name`
+            if (items[0]?.from?.options) {
+              items[0].from.options.forEach((option: { count?: number; of?: { name: string; url: string } }) => {
+                const optionTd = createElement("td", {
+                  innerHTML: option.of?.name || "N/A",
+                });
+                tr.appendChild(optionTd);
+              });
+            }
           } else {
-            // Default behavior: Create a cell for each object's `name`
-            perksAndEquipment.forEach((element) => {
+            // Default case: each array item gets a td with `name`
+            items.forEach((element: { name: string }) => {
               const td = createElement("td", { innerHTML: element.name });
               tr.appendChild(td);
             });
-            classTable.appendChild(tr);
           }
 
           // Append table to the selection container
           selectedClass.appendChild(classTable);
         }
       });
-
-
-    } else {
-      throw Error("Selection not found.");
     }
   };
 
-  if (sectionRace) {
-    sectionRace.addEventListener("change", handleCharacterChoices);
-  }
-  if (sectionClass) {
-    sectionClass.addEventListener("change", handleCharacterChoices);
-  }
+  // Add event listeners for race and class selection
+  sectionRace.addEventListener("change", handleCharacterChoices);
+  sectionClass.addEventListener("change", handleCharacterChoices);
 
   // Player assigns a value from the 'Standard Array' to each ability score
   const abilityScoreValues: number[] = [15, 14, 13, 12, 10, 8];
@@ -266,7 +220,7 @@ export const createCharacterForm = (divParent: HTMLElement) => {
 
       allAbilityScoreRadioGroups.forEach((otherGroups) => {
         if (otherGroups !== selectedGroup) {
-          const radioButtons = otherGroups.querySelectorAll(`input[type="radio"]`);
+          const radioButtons = otherGroups.querySelectorAll('input[type="radio"]');
           radioButtons.forEach((radio) => {
             const radioInput = radio as HTMLInputElement;
             if (radioInput.value === selectedValue) {
@@ -279,17 +233,4 @@ export const createCharacterForm = (divParent: HTMLElement) => {
       });
     });
   });
-};
-
-
-// ADD starting_equipment based on your class, show them && CHOOSE starting_equipment_options based on your class
-// ADD Saving throws
-// ADD Proficiencies
-// ADD HP = Max of class hit die + Constitution modifier
-// ADD Armor Class = Determined by armor, Dexterity modifier, and shields.
-// ADD Attack Bonus = Melee: Strength modifier + proficiency bonus. Ranged: Dexterity modifier + proficiency bonus.
-// ADD Spellcasting Ability (if applicable) = Determined by your class (e.g., Intelligence for Wizards, Charisma for Sorcerers).
-//CHOOSE Name
-
-//showLoader? som i Niklas repo. Se CharacterList.ts
-//Dela upp i flera filer?
+}
