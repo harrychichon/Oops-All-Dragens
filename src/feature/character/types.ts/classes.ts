@@ -1,6 +1,6 @@
 import { AbilityScore } from "./abilityScore";
 import { Proficiency } from "./proficiencies";
-import { Equipment } from "../../inventory/equipment";
+import { Equipment } from "../../cards/equipment";
 
 export type Class = {
   name: string;
@@ -20,7 +20,7 @@ export type Class = {
   ];
   proficiencies: [{
     name: Proficiency,
-    }
+  }
   ]
   saving_throws: [
     {
@@ -30,9 +30,9 @@ export type Class = {
   starting_equipment: [
     {
       equipment: {
-      index: string,
-      name: Equipment,
-      url: string,
+        index: string,
+        name: Equipment,
+        url: string,
       },
       quantity: number,
     }

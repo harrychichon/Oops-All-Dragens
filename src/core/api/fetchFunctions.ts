@@ -1,6 +1,7 @@
 import { baseUrl, endpoints } from "./api";
 import { SearchResult } from "./types";
 import { EntityMap, isType } from "../typeGuards";
+import { Equipment } from "../../feature/cards/equipment";
 
 //===============================================================================
 // ❓ UNIVERSAL FETCH FUNCTION
@@ -15,15 +16,27 @@ export const fetchApi = async <T>(apiUrl: string): Promise<T> => {
 // ❓ HELPER FUNCTION: FLATTEN OBJECT STRUCTURE (USED WHEN FILTERED KEYS ARE 
 //    NESTED)
 //===============================================================================
-const flattenObject = (obj: any, prefix = ""): Record<string, any> =>
-  Object.assign(
-    {},
-    ...Object.entries(obj).map(([key, value]) =>
-      typeof value === "object" && value !== null
-        ? flattenObject(value, `${prefix}${key}.`)
-        : { [`${prefix}${key}`]: value }
-    )
-  );
+const flattenObject = (obj: any, prefix = ""): Record<string, any> => {
+  let result: Record<string, any> = {};
+
+  for (const [key, value] of Object.entries(obj)) {
+    const newKey = prefix ? `${prefix}${key}` : key;
+
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        Object.assign(result, flattenObject(item, `${newKey}[${index}].`));
+      });
+    } else if (typeof value === "object" && value !== null) {
+      Object.assign(result, flattenObject(value, `${newKey}.`));
+    } else {
+      result[newKey] = value;
+    }
+  }
+
+
+  return result;
+};
+
 
 
 //===============================================================================
@@ -55,8 +68,8 @@ const allowedKeys: Record<string, Record<string, Set<string> | null>> = {
     proficiency_choices: null,
     proficiencies: null,
     saving_throws: null,
-    starting_equipment: new Set(["equipment.name", "quantity"]),
-    starting_equipment_options: new Set(["choose", "count", "of.name"]),
+    starting_equipment: new Set(["name", "quantity"]),
+    starting_equipment_options: new Set(["choose", "count", "name"]),
   },
   race: {
     name: null,
@@ -66,7 +79,16 @@ const allowedKeys: Record<string, Record<string, Set<string> | null>> = {
     size_description: null,
     starting_proficiencies: null,
   },
+  equipment: {
+    name: null,
+    equipment_category: null,
+    armor_class: null,
+    damage: null,
+    image: null,
+  },
+
 };
+
 
 //===============================================================================
 // ❓ FILTER/APPLY ALLOWED KEYS FUNCTION
@@ -76,7 +98,6 @@ export const filterAllowedKeys = <T extends Record<string, any>>(
   data: T
 ): Partial<T> => {
   const entityRules = allowedKeys[entityType.toLowerCase()];
-
 
   if (!entityRules) {
     console.warn(`No allowed keys defined for entity type: ${entityType}`);
@@ -92,13 +113,26 @@ export const filterAllowedKeys = <T extends Record<string, any>>(
         if (subKeys instanceof Set && Array.isArray(value)) {
           return [
             key,
-            value.map((item) =>
-              Object.fromEntries(
-                Object.entries(flattenObject(item)).filter(([subKey]) =>
-                  subKeys.has(subKey)
-                )
-              )
-            ),
+            value.map((item) => {
+              const flatItem = flattenObject(item);
+
+
+              const filteredItem = Object.fromEntries(
+                Object.entries(flatItem).filter(([origKey]) => {
+                  // Extract last part of the key (e.g., "from.options.count" → "count")
+                  const lastKeyPart = origKey.split(".").pop() || "";
+
+                  // Check if the last part matches an allowed key
+                  const isAllowed = subKeys.has(lastKeyPart);
+
+
+
+                  return isAllowed;
+                })
+              );
+
+              return filteredItem;
+            }),
           ];
         }
 
@@ -106,6 +140,9 @@ export const filterAllowedKeys = <T extends Record<string, any>>(
       })
   ) as Partial<T>;
 };
+
+
+
 
 
 //===============================================================================

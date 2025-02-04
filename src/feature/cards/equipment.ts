@@ -1,3 +1,5 @@
+import { Dice } from "../../core/utils/types/dice";
+
 export enum Equipment {
   AcidVial = "Acid (vial)",
   AlchemistsFireFlask = "Alchemist's fire (flask)",
@@ -149,3 +151,21 @@ export enum Equipment {
   PanFlute = "Pan flute",
   PaperOneSheet = "Paper (one sheet)",
 }
+
+export type EquipmentCard = weapon | armor
+
+export type armor = {
+  name: string,
+  equipment_category: string,
+  armor_class: number,
+  image: File,
+
+}
+
+export type weapon = {
+  name: string,
+  equipment_category: Object,
+  damage: Dice,
+  image: File,
+}
+

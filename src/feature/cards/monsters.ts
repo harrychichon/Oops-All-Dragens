@@ -1,6 +1,6 @@
-import { DiceRoll } from "../../../core/utils/types/dice";
-import { Proficiency } from "../../character/types.ts/proficiencies";
-import { HP } from "../../../core/utils/types/hp";
+import { DiceRoll } from "../../core/utils/types/dice";
+import { Proficiency } from "../character/types.ts/proficiencies";
+import { HP } from "../../core/utils/types/hp";
 
 export type Monster = {
   name: string;

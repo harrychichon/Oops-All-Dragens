@@ -4,17 +4,17 @@ import { AbilityScore } from "../types.ts/abilityScore";
 import { Class } from "../types.ts/classes";
 import { Race } from "../types.ts/races";
 import { createRadioButtonGroups } from "../../../core/utils/createRadioButtons";
-
+import { availableEquipment } from "../../../core/api/dataStorage";
 
 //===============================================================================
 // ❓ MAIN FUNCTION
 //===============================================================================
-const availableClasses: Class[] = [];
+const availableClasses: Class[] = []; //TODO Flytta till dataStorage
 
 const fetchClasses = await fetchAndRestructureOneObject("classes", "Barbarian") as Class;
-const filteredClass = filterAllowedKeys("Class", fetchClasses) as Class;
-availableClasses.push(filteredClass);
-console.log(filteredClass);
+availableClasses.push(fetchClasses);
+
+console.log(await availableEquipment)
 
 const allRaces: string[] = [
   "Dragonborn",
@@ -29,7 +29,7 @@ const allRaces: string[] = [
 ];
 
 export const createCharacterForm = (divParent: HTMLElement) => {
-  const div: HTMLDivElement = createElement("div", { // Skapa element för H1
+  const div: HTMLDivElement = createElement("div", {
     innerHTML: `
     <h1>Character creation</h1>
     `,
@@ -37,7 +37,7 @@ export const createCharacterForm = (divParent: HTMLElement) => {
   divParent.appendChild(div);
 
   //RACE
-  const sectionRace = createElement("section", { // Skapa element för H2
+  const sectionRace = createElement("section", {
     className: "sectionRace",
     innerHTML: "<h2>Choose a race</h2>",
   });
@@ -47,7 +47,7 @@ export const createCharacterForm = (divParent: HTMLElement) => {
   //CLASS
   const sectionClass = createElement("section", {
     className: "sectionClass",
-    innerHTML: "<h2>Choose a class</h2>",// Skapa element för H2
+    innerHTML: "<h2>Choose a class</h2>",
   });
   const classNames = availableClasses.map((cls) => cls.name);
   createRadioButtonGroups("classes", classNames, sectionClass);
@@ -58,7 +58,7 @@ export const createCharacterForm = (divParent: HTMLElement) => {
   div.append(sectionRace, sectionClass, containerCurrentSelection);
   containerCurrentSelection.append(selectedRace, selectedClass);
 
-  //EventListener function to fetch a class/race //TODO Flytta till events.ts
+  //EventListener function to fetch a class/race
   const handleCharacterChoices = async (e: Event) => {
     const target = e.target as HTMLInputElement;
     const endpoint = target.name === "races" ? "races" : "classes";
@@ -66,7 +66,7 @@ export const createCharacterForm = (divParent: HTMLElement) => {
     const response =
       endpoint === "races"
         ? await fetchAndRestructureOneObject("races", target.value)
-        : await fetchAndRestructureOneObject("classes", target.value);
+        : availableClasses.find((cls) => cls.name === target.value)
     console.log(response);
 
     if (endpoint === "races") {
@@ -123,103 +123,75 @@ export const createCharacterForm = (divParent: HTMLElement) => {
       });
       selectedClass.appendChild(classAbout)
 
-
       // Remaining class perks and equipment
-      const tableKeys: (keyof Class)[] = [
+      const listKeys: (keyof Class)[] = [
         "proficiencies",
         "saving_throws",
         "starting_equipment",
         "starting_equipment_options",
       ];
 
-      tableKeys.forEach((key) => {
-        const perksAndEquipment = fetchedClass[key] as any[] | undefined; //TODO Ändra 'any'
+      listKeys.forEach((key) => {
+        const perksAndEquipment = fetchedClass[key] as any[] | undefined; //TODO Ta bort any
 
         // Checks type and that it's an array that's not empty
         if (perksAndEquipment && Array.isArray(perksAndEquipment) && perksAndEquipment.length > 0) {
-          // Create table element
-          const classTable = createElement("table");
-          const caption = createElement("caption", {
+          // Create list element
+          const classList = createElement("ul");
+          const caption = createElement("h4", {
             innerHTML: key.replace(/_/g, " ").toUpperCase(),
           });
-          classTable.appendChild(caption);
-          const tr = createElement("tr");
-          classTable.appendChild(tr);
+          selectedClass.appendChild(caption);
+          selectedClass.appendChild(classList);
 
           if (key === "starting_equipment") {
-            const headerRow = createElement("tr");
-            headerRow.appendChild(createElement("th", { innerHTML: "Name" }));
-            headerRow.appendChild(createElement("th", { innerHTML: "Quantity" }));
-            classTable.appendChild(headerRow);
-
-            console.log(perksAndEquipment)
-
-            // Populate table with starting equipment
             perksAndEquipment.forEach((item) => {
-              const row = createElement("tr");
-              row.appendChild(
-                createElement("td", { innerHTML: item["equipment.name"] })
-              );
-              row.appendChild(
-                createElement("td", { innerHTML: item.quantity?.toString() })
-              );
-              classTable.appendChild(row);
+              const listItem = createElement("li", {
+                innerHTML: `${item["equipment.name"]} (Quantity: ${item.quantity})`,
+              });
+              classList.appendChild(listItem);
             });
 
           } else if (key === "starting_equipment_options") {
-            const headerRow = createElement("tr");
-            headerRow.appendChild(createElement("th", { innerHTML: "Choose" }));
-            headerRow.appendChild(createElement("th", { innerHTML: "Count" }));
-            headerRow.appendChild(createElement("th", { innerHTML: "Name" }));
-            classTable.appendChild(headerRow);
-
-            // Populate table with starting equipment options
             perksAndEquipment.forEach((item) => {
-              const row = createElement("tr");
 
-              // Create a cell for "choose"
-              row.appendChild(
-                createElement("td", { innerHTML: item.choose?.toString() || "N/A" })
-              );
+              const keys = Object.keys(item);
 
-              // Check if options exist //TODO Behövs den här med nya filtreringen?
-              if (item.from?.options) {
-                item.from.options.forEach((option: { count?: number; of?: { name: string } }) => {
-                  const optionRow = createElement("tr");
+              for (let index = 0; index < keys.length; index++) {
+                let key = keys[index];   // Get the key
+                const value = item[key];    // Get the value
+                // console.log(value)
+                if (key === "choose") {
+                  const choose = createElement("li", { innerHTML: `Choose ${value} from: ` })
+                  classList.appendChild(choose)
+                  console.log(choose);
 
-                  // Create a cell for "count"
-                  optionRow.appendChild(
-                    createElement("td", {
-                      innerHTML: option.count?.toString() || "N/A",
-                    })
-                  );
+                } else if (/^from\.options\[\d+\]\.count$/.test(key)) {
+                  const count = createElement("ul", { innerHTML: `Count: ${value}` })
+                  classList.appendChild(count)
+                  console.log(count);
 
-                  // Create a cell for "name"
-                  optionRow.appendChild(
-                    createElement("td", {
-                      innerHTML: option.of?.name || "N/A",
-                    })
-                  );
+                } else if (/^from\.options\[\d+\]\.of.name$/.test(key)) {
+                  const name = createElement("ul", { innerHTML: `${value}` })
+                  classList.appendChild(name)
+                  console.log(name);
 
-                  classTable.appendChild(optionRow);
-                });
+
+                }
+                console.log(index)
               }
-              classTable.appendChild(row);
-            });
-          } else {
-            // Default behavior: Create a cell for each object's `name`
-            perksAndEquipment.forEach((element) => {
-              const td = createElement("td", { innerHTML: element.name });
-              tr.appendChild(td);
-            });
-            classTable.appendChild(tr);
-          }
 
-          // Append table to the selection container
-          selectedClass.appendChild(classTable);
+            })
+
+
+          } else {
+            perksAndEquipment.forEach((element) => {
+              const listItem = createElement("li", { innerHTML: element.name });
+              classList.appendChild(listItem);
+            });
+          }
         }
       });
-
 
     } else {
       throw Error("Selection not found.");
@@ -240,10 +212,9 @@ export const createCharacterForm = (divParent: HTMLElement) => {
     innerHTML: "Ability Scores",
   });
   div.appendChild(sectionAbilityScore);
-  //TODO Beskrivning av respektive ability score
+
   //Creates sections for each Ability Score
   Object.keys(AbilityScore).forEach((key) => {
-    // Filter out any numeric values from the enum
     if (isNaN(Number(key))) {
       const sectionAbility = createElement("section", {
         id: key,
@@ -258,7 +229,7 @@ export const createCharacterForm = (divParent: HTMLElement) => {
   const allAbilityScoreRadioGroups = document.querySelectorAll("section");
 
   //Ensures each value for abilityScoreValues can only be selected for one of the ability scores
-  allAbilityScoreRadioGroups.forEach((selectedGroup) => { // TODO 1. Varför beter den sig konstigt när man väljer? //TODO 2. Flytta till event.ts
+  allAbilityScoreRadioGroups.forEach((selectedGroup) => {
     selectedGroup.addEventListener("change", (e: Event) => {
       const target = e.target as HTMLInputElement | null;
       if (!target) return;
@@ -280,16 +251,3 @@ export const createCharacterForm = (divParent: HTMLElement) => {
     });
   });
 };
-
-
-// ADD starting_equipment based on your class, show them && CHOOSE starting_equipment_options based on your class
-// ADD Saving throws
-// ADD Proficiencies
-// ADD HP = Max of class hit die + Constitution modifier
-// ADD Armor Class = Determined by armor, Dexterity modifier, and shields.
-// ADD Attack Bonus = Melee: Strength modifier + proficiency bonus. Ranged: Dexterity modifier + proficiency bonus.
-// ADD Spellcasting Ability (if applicable) = Determined by your class (e.g., Intelligence for Wizards, Charisma for Sorcerers).
-//CHOOSE Name
-
-//showLoader? som i Niklas repo. Se CharacterList.ts
-//Dela upp i flera filer?

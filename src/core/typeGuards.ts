@@ -1,7 +1,7 @@
-import { Monster } from "../feature/cards/monsters/monsters";
+import { Monster } from "../feature/cards/monsters";
 import { Class } from "../feature/character/types.ts/classes";
 import { Race } from "../feature/character/types.ts/races";
-import { Equipment } from "../feature/inventory/equipment";
+import { Equipment, EquipmentCard } from "../feature/cards/equipment";
 import { Character } from "../feature/character/types.ts/character";
 
 // Define the allowed type names
@@ -11,7 +11,7 @@ type EntityType = "monster" | "spell" | "equipment" | "magicItem" | "character" 
 export type EntityMap = {
   monster: Monster;
   spell: Spell;
-  equipment: Equipment;
+  equipmentCard: EquipmentCard;
   magicItem: MagicItem;
   character: Character;
   class: Class;
@@ -30,7 +30,7 @@ export const isType = <T extends keyof EntityMap>(obj: unknown, type: T): obj is
       return hasKeys(obj, ["armor_class", "hit_points", "challenge_rating"]);
     case "spell":
       return hasKeys(obj, ["level", "casting_time", "components"]);
-    case "equipment":
+    case "equipmentCard":
       return hasKeys(obj, ["cost", "weight", "equipment_category"]);
     case "magicItem":
       return hasKeys(obj, ["rarity", "desc"]);

@@ -1,4 +1,4 @@
-import { Monster } from "../../feature/cards/monsters/monsters";
+import { Monster } from "../../feature/cards/monsters";
 export type SearchableCategories = keyof Monster;
 
 export type SearchResult = {

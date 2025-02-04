@@ -1,5 +1,5 @@
-import { Monster } from "../feature/cards/monsters/monsters";
-import { Equipment } from "../feature/inventory/equipment";
+import { Monster } from "../feature/cards/monsters";
+import { Equipment } from "../feature/cards/equipment";
 
 //===============================================================================
 // ❓ STATE
