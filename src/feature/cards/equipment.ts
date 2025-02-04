@@ -156,7 +156,7 @@ export type EquipmentCard = weapon | armor
 
 export type armor = {
   name: string,
-  equipment_category: string,
+  equipment_category: Object,
   armor_class: number,
   image: File,
 

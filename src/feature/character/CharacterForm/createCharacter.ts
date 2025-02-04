@@ -14,7 +14,7 @@ const availableClasses: Class[] = []; //TODO Flytta till dataStorage
 const fetchClasses = await fetchAndRestructureOneObject("classes", "Barbarian") as Class;
 availableClasses.push(fetchClasses);
 
-console.log(await availableEquipment)
+// console.log(await availableEquipment)
 
 const allRaces: string[] = [
   "Dragonborn",
@@ -154,35 +154,30 @@ export const createCharacterForm = (divParent: HTMLElement) => {
 
           } else if (key === "starting_equipment_options") {
             perksAndEquipment.forEach((item) => {
-
               const keys = Object.keys(item);
 
               for (let index = 0; index < keys.length; index++) {
-                let key = keys[index];   // Get the key
-                const value = item[key];    // Get the value
-                // console.log(value)
+                let key = keys[index]; // Get the key
+                const value = item[key]; // Get the value
+
                 if (key === "choose") {
-                  const choose = createElement("li", { innerHTML: `Choose ${value} from: ` })
-                  classList.appendChild(choose)
-                  console.log(choose);
-
+                  const choose = createElement("li", { innerHTML: `Choose ${value} from: ` });
+                  classList.appendChild(choose);
                 } else if (/^from\.options\[\d+\]\.count$/.test(key)) {
-                  const count = createElement("ul", { innerHTML: `Count: ${value}` })
-                  classList.appendChild(count)
-                  console.log(count);
-
+                  const count = createElement("ul", { innerHTML: `Count: ${value}` });
+                  classList.appendChild(count);
                 } else if (/^from\.options\[\d+\]\.of.name$/.test(key)) {
-                  const name = createElement("ul", { innerHTML: `${value}` })
-                  classList.appendChild(name)
-                  console.log(name);
-
-
+                  const name = createElement("ul", { innerHTML: `${value}` });
+                  classList.appendChild(name);
+                } else if (/^from\.options\[\d+\]\.choice\.choose$/.test(key)) {
+                  const choose = createElement("ul", { innerHTML: `Choose ${value}` });
+                  classList.appendChild(choose);
+                } else if (/^from\.options\[\d+\]\.choice\.from\.equipment_category\.name$/.test(key)) {
+                  const category = createElement("ul", { innerHTML: `Category: ${value}` });
+                  classList.appendChild(category);
                 }
-                console.log(index)
               }
-
-            })
-
+            });
 
           } else {
             perksAndEquipment.forEach((element) => {
