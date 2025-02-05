@@ -1,4 +1,4 @@
-import { DiceRoll } from "../../core/utils/types/dice";
+import { Dice } from "../../core/utils/types/dice";
 import { Proficiency } from "../character/types.ts/proficiencies";
 import { HP } from "../../core/utils/types/hp";
 
@@ -6,8 +6,8 @@ export type Monster = {
   name: string;
   armor_class: number[];
   hit_points: HP;
-  hit_dice: DiceRoll;
-  hit_points_roll: `${DiceRoll}+${number}`;
+  hit_dice: Dice;
+  hit_points_roll: number;
   strength: number;
   dexterity: number;
   constitution: number;
@@ -21,21 +21,21 @@ export type Monster = {
     };
   }[];
   challenge_rating: number;
-  proficiency_bonus: number; //TODO Behövs den här?
+  proficiency_bonus: number;
   xp: number;
   special_abilities: [
     {
       name: string;
       desc: string;
       spellcasting?: {
-        //TODO När monster hämtas: IF spellcasting, get spell, ELSE get other ability
+
         level: number;
         ability: {
-          name: string; //TODO Uppdatera till Spell.name efter alla spells är typade
+          name: string;
         };
         dc?: number;
       };
-      modifier: number; //TODO Behövs den här?
+      modifier: number;
       spells: [
         {
           name: string;
@@ -65,7 +65,7 @@ export type Monster = {
       };
     }[],
     legendary_actions?: {
-      //TODO IF legendary, get 1 action and 1 legendary actoin
+
       name: string;
       desc: string;
       attack_bonus?: number;
@@ -74,5 +74,4 @@ export type Monster = {
       }[];
     }
   ];
-  image: string; //TODO string eller spara som .png eller skapa en typ som innehåller .png?
-};
+  image: string; 

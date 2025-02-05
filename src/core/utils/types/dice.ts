@@ -1,10 +1,13 @@
-export enum Dice {
-  d4 = "d4",
-  d6 = "d6",
-  d8 = "d8",
-  d10 = "d10",
-  d12 = "d12",
-  d20 = "d20",
+export type Dice = {
+  name: string,
+  sides: number,
 }
 
-export type DiceRoll = `${number}${Dice}`;
+export const availableDice: Dice[] = [
+  { name: "d4", sides: 4 },
+  { name: "d6", sides: 6 },
+  { name: "d8", sides: 8 },
+  { name: "d10", sides: 10 },
+  { name: "d12", sides: 12 },
+  { name: "d20", sides: 20 },
+]

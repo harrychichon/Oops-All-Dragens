@@ -152,12 +152,12 @@ export enum Equipment {
   PaperOneSheet = "Paper (one sheet)",
 }
 
-export type EquipmentCard = weapon | armor
+export type EquipmentCard = armor | weapon
 
 export type armor = {
   name: string,
   equipment_category: Object,
-  armor_class: number,
+  armor_class: { [key: string]: number, base: number },
   image: File,
 
 }

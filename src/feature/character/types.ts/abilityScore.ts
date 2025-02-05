@@ -5,4 +5,5 @@ export enum AbilityScore {
   INT,
   STR,
   WIS,
+
 }

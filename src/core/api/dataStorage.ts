@@ -28,7 +28,7 @@ const fetchEquipment = async (): Promise<EquipmentCard[]> => {
     });
 
 
-    console.log("Filtered Equipment:", availableEquipment); // Debugging Log
+    console.log("Filtered Equipment:", availableEquipment);
 
     return stash;
 };

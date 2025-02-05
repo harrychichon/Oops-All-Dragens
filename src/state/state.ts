@@ -1,11 +1,14 @@
 import { Monster } from "../feature/cards/monsters";
 import { Equipment } from "../feature/cards/equipment";
+import { Character } from "../feature/character/types.ts/character";
+import { createCharacterForm } from "../feature/character/CharacterForm/createCharacter";
 
 //===============================================================================
 // ❓ STATE
 //===============================================================================
 // Stored in array and map for different uses
 type GameData = {
+  character: Character;
   monsters: Monster[];
   monsterMap: Record<string, Monster>;
   equipment: Equipment[];
@@ -16,7 +19,24 @@ type GameData = {
   //   spellMap: Record<string, Spell>;
 };
 
-const table: GameData = {
+export let table: GameData = {
+  character: {
+    name: "",
+    race: "",
+    class: "",
+    hitdie: {
+      name: "",
+      sides: 0
+    },
+    proficiencies: [],
+    savingThrows: [],
+    abilityScores: {},
+    equipped: [],
+    inventory: [],
+    hitPoints: 0,
+    armorClass: 0,
+    attackBonus: {}
+  },
   monsters: [],
   monsterMap: {},
   equipment: [],
@@ -26,6 +46,9 @@ const table: GameData = {
   // spells: [],
   // spellMap: {}
 };
+
+console.log(table);
+
 
 
 //SWITCH

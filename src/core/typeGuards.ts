@@ -5,7 +5,7 @@ import { Equipment, EquipmentCard } from "../feature/cards/equipment";
 import { Character } from "../feature/character/types.ts/character";
 
 // Define the allowed type names
-type EntityType = "monster" | "spell" | "equipment" | "magicItem" | "character" | "class" | "race"; //TODO Varför har jag inte använt variabeln?
+// type EntityType = "monster" | "spell" | "equipment" | "magicItem" | "character" | "class" | "race"; 
 
 // Define a mapping from type names to actual TypeScript types
 export type EntityMap = {

@@ -1,7 +1,7 @@
 import { baseUrl, endpoints } from "./api";
 import { SearchResult } from "./types";
 import { EntityMap, isType } from "../typeGuards";
-import { Equipment } from "../../feature/cards/equipment";
+
 
 //===============================================================================
 // ❓ UNIVERSAL FETCH FUNCTION
@@ -86,7 +86,6 @@ const allowedKeys: Record<string, Record<string, Set<string> | null>> = {
     damage: null,
     image: null,
   },
-
 };
 
 

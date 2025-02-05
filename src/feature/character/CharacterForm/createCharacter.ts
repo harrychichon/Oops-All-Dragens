@@ -1,18 +1,28 @@
 import { createElement } from "../../../core/utils/createElement";
-import { fetchAndRestructureOneObject, filterAllowedKeys } from "../../../core/api/fetchFunctions";
+import { fetchAndRestructureOneObject, fetchApi } from "../../../core/api/fetchFunctions";
 import { AbilityScore } from "../types.ts/abilityScore";
 import { Class } from "../types.ts/classes";
 import { Race } from "../types.ts/races";
 import { createRadioButtonGroups } from "../../../core/utils/createRadioButtons";
-import { availableEquipment } from "../../../core/api/dataStorage";
+import { calculateArmorClass, calculateMaxHP, calculateModifier, Character } from "../types.ts/character";
+import { availableDice } from "../../../core/utils/types/dice";
+import { baseUrl, endpoints } from "../../../core/api/api";
+import { table } from "../../../state/state";
 
 //===============================================================================
 // ❓ MAIN FUNCTION
 //===============================================================================
 const availableClasses: Class[] = []; //TODO Flytta till dataStorage
 
+console.log(await fetchApi(`${baseUrl}${endpoints["classes"]}barbarian`))
+
 const fetchClasses = await fetchAndRestructureOneObject("classes", "Barbarian") as Class;
-availableClasses.push(fetchClasses);
+const fetchRogue = await fetchAndRestructureOneObject("classes", "Rogue") as Class;
+const fetchWizard = await fetchAndRestructureOneObject("classes", "Wizard") as Class;
+
+availableClasses.push(fetchClasses, fetchRogue, fetchWizard);
+console.log(fetchClasses);
+
 
 // console.log(await availableEquipment)
 
@@ -28,6 +38,7 @@ const allRaces: string[] = [
   "Tiefling",
 ];
 
+//TODO skapa element för h1
 export const createCharacterForm = (divParent: HTMLElement) => {
   const div: HTMLDivElement = createElement("div", {
     innerHTML: `
@@ -37,6 +48,7 @@ export const createCharacterForm = (divParent: HTMLElement) => {
   divParent.appendChild(div);
 
   //RACE
+  //TODO skapa element för h2
   const sectionRace = createElement("section", {
     className: "sectionRace",
     innerHTML: "<h2>Choose a race</h2>",
@@ -45,6 +57,7 @@ export const createCharacterForm = (divParent: HTMLElement) => {
   const selectedRace = createElement("section", { id: "race-current-selection" });
 
   //CLASS
+  //TODO skapa element för h2
   const sectionClass = createElement("section", {
     className: "sectionClass",
     innerHTML: "<h2>Choose a class</h2>",
@@ -58,7 +71,7 @@ export const createCharacterForm = (divParent: HTMLElement) => {
   div.append(sectionRace, sectionClass, containerCurrentSelection);
   containerCurrentSelection.append(selectedRace, selectedClass);
 
-  //EventListener function to fetch a class/race
+  //EventListener function to fetch a class/race //TODO Flytta til events.ts
   const handleCharacterChoices = async (e: Event) => {
     const target = e.target as HTMLInputElement;
     const endpoint = target.name === "races" ? "races" : "classes";
@@ -136,13 +149,14 @@ export const createCharacterForm = (divParent: HTMLElement) => {
 
         // Checks type and that it's an array that's not empty
         if (perksAndEquipment && Array.isArray(perksAndEquipment) && perksAndEquipment.length > 0) {
-          // Create list element
-          const classList = createElement("ul");
+
+          const classList = createElement("div");
           const caption = createElement("h4", {
             innerHTML: key.replace(/_/g, " ").toUpperCase(),
           });
           selectedClass.appendChild(caption);
           selectedClass.appendChild(classList);
+
 
           if (key === "starting_equipment") {
             perksAndEquipment.forEach((item) => {
@@ -152,38 +166,40 @@ export const createCharacterForm = (divParent: HTMLElement) => {
               classList.appendChild(listItem);
             });
 
-          } else if (key === "starting_equipment_options") {
+          } else if (key === "saving_throws") {
+            const savingThrows = perksAndEquipment.map((item) => item.name);
+            const listItem = createElement("li", {
+              innerHTML: `${savingThrows.join(", ")}`,
+            });
+            classList.appendChild(listItem);
+
+          } else if (key === "proficiencies") {
+            const proficienciesTable = createElement("table");
+
+            classList.appendChild(proficienciesTable);
+
+
             perksAndEquipment.forEach((item) => {
-              const keys = Object.keys(item);
+              const tr = createElement("tr");
+              const td = createElement("td", { innerHTML: `${item.name}` });
+              tr.appendChild(td);
+              proficienciesTable.appendChild(tr);
+            });
 
-              for (let index = 0; index < keys.length; index++) {
-                let key = keys[index]; // Get the key
-                const value = item[key]; // Get the value
-
+          } else if (key === "starting_equipment_options") { //TODO Gör clickable
+            perksAndEquipment.forEach((item) => {
+              Object.entries(item).forEach(([key, value]) => {
                 if (key === "choose") {
-                  const choose = createElement("li", { innerHTML: `Choose ${value} from: ` });
-                  classList.appendChild(choose);
-                } else if (/^from\.options\[\d+\]\.count$/.test(key)) {
-                  const count = createElement("ul", { innerHTML: `Count: ${value}` });
-                  classList.appendChild(count);
-                } else if (/^from\.options\[\d+\]\.of.name$/.test(key)) {
-                  const name = createElement("ul", { innerHTML: `${value}` });
-                  classList.appendChild(name);
-                } else if (/^from\.options\[\d+\]\.choice\.choose$/.test(key)) {
-                  const choose = createElement("ul", { innerHTML: `Choose ${value}` });
-                  classList.appendChild(choose);
-                } else if (/^from\.options\[\d+\]\.choice\.from\.equipment_category\.name$/.test(key)) {
-                  const category = createElement("ul", { innerHTML: `Category: ${value}` });
-                  classList.appendChild(category);
+                  const div = createElement("div", { innerHTML: `Choose ${value} from: ` });
+                  classList.appendChild(div);
+                } else if (key === "from.options[0].count" || key === "from.options[1].choice.choose") {
+                  classList.innerHTML += `${value} `;
+                } else if (key === "from.options[0].of.name" || key === "from.options[1].choice.from.equipment_category.name") {
+                  classList.innerHTML += `${value} `;
                 }
-              }
+              });
             });
 
-          } else {
-            perksAndEquipment.forEach((element) => {
-              const listItem = createElement("li", { innerHTML: element.name });
-              classList.appendChild(listItem);
-            });
           }
         }
       });
@@ -224,6 +240,7 @@ export const createCharacterForm = (divParent: HTMLElement) => {
   const allAbilityScoreRadioGroups = document.querySelectorAll("section");
 
   //Ensures each value for abilityScoreValues can only be selected for one of the ability scores
+  //TODO Fixa så att det inte går att välja samma värde för två olika ability scores
   allAbilityScoreRadioGroups.forEach((selectedGroup) => {
     selectedGroup.addEventListener("change", (e: Event) => {
       const target = e.target as HTMLInputElement | null;
@@ -244,5 +261,34 @@ export const createCharacterForm = (divParent: HTMLElement) => {
         }
       });
     });
+  });
+  const characterName = createElement("input", { type: "text", placeholder: "Character Name" });
+  div.appendChild(characterName);
+  const createCharacterButton = createElement("button", { innerHTML: "Create Character", type: "button" });
+  div.appendChild(createCharacterButton);
+
+  createCharacterButton.addEventListener("click", () => {
+    const createCharacter = () => { //TODO Fixa hela skiten
+      const character: Character = {
+        name: characterName.value,
+        race: selectedRace.innerHTML,
+        class: selectedClass.innerHTML,
+        hitdie: availableDice[2], //TODO Fixa dynamiskt
+        proficiencies: fetchClasses.proficiencies,
+        savingThrows: fetchClasses.saving_throws,
+        abilityScores: fetchClasses.ability_scores,
+        equipped: fetchClasses.starting_equipment,
+        inventory: fetchClasses.starting_equipment_options,
+        hitPoints: calculateMaxHP(availableDice[2], fetchClasses.ability_scores.constitution),
+        armorClass: calculateArmorClass(fetchClasses.ability_scores.dexterity, fetchClasses.starting_equipment),
+        attackBonus: {
+          strength: AbilityScore.STR + calculateModifier(fetchClasses.ability_scores.STR),
+        },
+      };
+      console.log(character)
+      return character;
+    };
+    table.character = createCharacter();
+    console.log(table)
   });
 };
