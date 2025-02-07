@@ -1,0 +1,103 @@
+@use "../../../styles/default/forwards" as *;
+
+@media screen and (min-width: 768px) {
+
+    #form-container,
+    #character-description {
+        display: flex;
+        padding: 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        flex: 1 0 0;
+        align-self: stretch;
+        background: #31201c;
+        border-radius: $border-radius;
+        max-width: 50vw;
+        min-height: 80vh;
+        min-width: 30vw;
+
+        h2 {
+            @include h2;
+        }
+
+        h3 {
+            @include h3;
+        }
+
+        h4 {
+            @include h4;
+        }
+
+        .sectionRace,
+        .sectionClass {
+            display: flex;
+            flex-flow: row wrap;
+            justify-content: start;
+            align-items: center;
+            gap: 7px;
+
+
+        }
+
+
+        #ability-score-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 10px;
+        }
+    }
+}
+
+@media screen and (max-width: 767px) {
+
+    #form-container,
+    #character-description {
+        display: flex;
+        padding: 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        flex: 1 0 0;
+        align-self: stretch;
+        background: #31201c;
+        border-radius: $border-radius;
+        // max-width: 50vw;
+        // min-height: 80vh;
+        // min-width: 30vw;
+
+        h2 {
+            @include h2;
+        }
+
+        h3 {
+            @include h3;
+        }
+
+        h4 {
+            @include h4;
+        }
+
+        .sectionRace,
+        .sectionClass {
+            display: flex;
+            flex-flow: row wrap;
+            justify-content: start;
+            align-items: center;
+            gap: 7px;
+
+
+        }
+
+
+        #ability-score-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 10px;
+        }
+    }
+}

@@ -1,15 +1,10 @@
-import { AbilityScore } from "./abilityScore";
+import { AbilityBonus } from "./abilityScore";
 import { Proficiency } from "./proficiencies";
 
 export type Race = {
   name: string;
   ability_bonuses: [
-    {
-      ability_score: {
-        name: AbilityScore;
-      };
-      bonus: number;
-    }
+    ability_score: AbilityBonus
   ];
   alignment: string;
   age: string;

@@ -1,10 +1,11 @@
-import { AbilityScore } from "./abilityScore";
+import { AbilityBonus } from "./abilityScore";
 import { Proficiency } from "./proficiencies";
 import { Equipment } from "../../cards/equipment";
+import { Dice } from "../../../core/utils/types/dice";
 
 export type Class = {
   name: string;
-  hit_die: number;
+  hit_die: Dice;
   proficiencies_choices: [
     {
       desc: string;
@@ -24,7 +25,7 @@ export type Class = {
   ]
   saving_throws: [
     {
-      name: AbilityScore;
+      name: AbilityBonus;
     }
   ];
   starting_equipment: [
@@ -39,6 +40,7 @@ export type Class = {
   ];
   starting_equipment_options: [
     {
+      equipment: any;
       desc: string;
       choose: number;
       from: {

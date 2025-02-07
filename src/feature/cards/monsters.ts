@@ -57,7 +57,7 @@ export type Monster = {
       attack_bonus?: number;
       dc?: number;
       damage?: {
-        damage_dice: `${DiceRoll}+${number}`;
+        damage_dice: string;
       }[];
       usage?: {
         type: string; // string
@@ -70,8 +70,9 @@ export type Monster = {
       desc: string;
       attack_bonus?: number;
       damage?: {
-        damage_dice: `${DiceRoll}+${number}`;
+        damage_dice: string;
       }[];
     }
   ];
-  image: string; 
+  image: string;
+};

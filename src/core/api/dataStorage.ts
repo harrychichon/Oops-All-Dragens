@@ -19,7 +19,6 @@ const fetchEquipment = async (): Promise<EquipmentCard[]> => {
     const stash: EquipmentCard[] = [];
     await fetchAndRestructureAllObjects("equipment", stash);
 
-    console.log("Fetched Equipment Stash:", stash); // Debugging Log
 
     stash.forEach((item: EquipmentCard) => {
         if (typeof item.equipment_category === 'object' && 'name' in item.equipment_category && (item.equipment_category.name === "Armor" || item.equipment_category.name === "Weapon")) {

@@ -7,12 +7,12 @@ export const createRadioButtonGroups = (groupName: string, array: string[] | num
   array.forEach((element) => {
     const input = createElement("input", {
       type: "radio",
-      id: `${element}-radio-button`,
+      id: `${groupName.toLocaleLowerCase()}-radio-button-${element}`,
       name: groupName,
       value: element.toString(),
     });
     parent.appendChild(input);
-    const label = createElement("label", { htmlFor: input.id }, element.toString());
+    const label = createElement("label", { className: "radio-item", htmlFor: input.id }, element.toString());
     parent.appendChild(label);
   });
 };

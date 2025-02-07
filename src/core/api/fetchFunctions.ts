@@ -63,6 +63,7 @@ const allowedKeys: Record<string, Record<string, Set<string> | null>> = {
     image: null,
   },
   class: {
+
     name: null,
     hit_die: null,
     proficiency_choices: null,
@@ -71,6 +72,7 @@ const allowedKeys: Record<string, Record<string, Set<string> | null>> = {
     starting_equipment: new Set(["name", "quantity"]),
     starting_equipment_options: new Set(["choose", "count", "name"]),
   },
+
   race: {
     name: null,
     ability_bonuses: null,
@@ -118,10 +120,10 @@ export const filterAllowedKeys = <T extends Record<string, any>>(
 
               const filteredItem = Object.fromEntries(
                 Object.entries(flatItem).filter(([origKey]) => {
-                  // Extract last part of the key (e.g., "from.options.count" → "count")
+
                   const lastKeyPart = origKey.split(".").pop() || "";
 
-                  // Check if the last part matches an allowed key
+
                   const isAllowed = subKeys.has(lastKeyPart);
 
 
@@ -135,7 +137,7 @@ export const filterAllowedKeys = <T extends Record<string, any>>(
           ];
         }
 
-        return [key, value]; // Return as-is if no filtering is needed
+        return [key, value];
       })
   ) as Partial<T>;
 };
@@ -184,3 +186,5 @@ export const fetchAndRestructureOneObject = async <T extends keyof EntityMap>(
 
   throw new Error(`Unknown object type for ${objectName}`);
 };
+
+
